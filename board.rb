@@ -6,8 +6,9 @@ class Board
   def initialize
     @grid = Array.new(9) { Array.new(9) }
     populate
+    #render
     fill_with_bombs
-    render
+    populate_bomb_count
   end
 
   def [](pos)
@@ -15,14 +16,26 @@ class Board
     @grid[x][y]
   end
 
-  def []=(pos, value)
+  def []=(pos, tile)
     x, y = pos
-    tile = @grid[x][y]
-    tile.value = value
+    @grid[x][y] = tile
   end
 
   def populate
-    @grid.map! { |row| row.map {|col| Tile.new(self,[row,col]) }}
+    (0...@grid.length).each do |i|
+      (0...@grid.length).each do |j|
+        @grid[i][j] = Tile.new(self, [i,j])
+      end
+    end
+
+  end
+
+  def populate_bomb_count
+    (0...@grid.length).each do |i|
+      (0...@grid.length).each do |j|
+        @grid[i][j].value = @grid[i][j].neighbor_bomb_count
+      end
+    end
   end
 
   def fill_with_bombs
@@ -39,7 +52,16 @@ class Board
 
   def render
     @grid.each do |i|
-      p i
+      array = i.map do |tile|
+        t = :o
+        if tile.flagged == true
+          t = :F
+        elsif tile.revealed
+          t = tile.value
+        end
+        t
+      end
+      p array
     end
   end
 end
